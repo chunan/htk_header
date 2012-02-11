@@ -1,10 +1,11 @@
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <cassert>
 #include <iomanip>
 #include <cstdlib>
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::string;
 using std::setprecision;
@@ -12,14 +13,14 @@ using std::setprecision;
 FILE *FOPEN(const char fname[], char const flag[]) {
 	FILE *fd = fopen(fname, flag);
 	if (fd == NULL) {
-		fprintf(stderr, "Unable to open file %s with flag %s\n", fname, flag);
+		cerr << "Unable to open file " << fname << " with flag " << flag << "\n";
 		exit(-1);
 	}
 	return fd;
 }
 
 void Usage(const char *program_name) {
-  fprintf(stderr, "Usage: %s <htk_file1> <htk_file2>...\n", program_name);
+  cerr << "Usage: " << program_name << " <htk_file1> <htk_file2>...\n";
 }
 
 template<class _Tp>
@@ -68,6 +69,7 @@ int main(const int argc, const char **argv) {
     return 1;
   }
   FILE *fd;
+  bool dumpData = false;
   /* A sample is a numDim vector:
    * sampSize = numDim * valSize (unit = bytes)
    * numSamp = number of time frames
@@ -82,7 +84,16 @@ int main(const int argc, const char **argv) {
   string str_pkind;
 
   for (int i = 1; i < argc; ++i) {
-    printf("FILE = %s\n", argv[i]);
+    if (strcmp(argv[i], "-d") == 0) {
+      dumpData = true;
+    }
+  }
+
+  for (int i = 1; i < argc; ++i) {
+    if (strcmp(argv[i], "-d") == 0) {
+      continue;
+    }
+    cout << "FILE = " << argv[i] << "\n";
     fd = FOPEN(argv[i], "r");
     assert(fread(&numSamp, 4, 1, fd) == 1);
     assert(fread(&sampPeriod, 4, 1, fd) == 1);
@@ -153,23 +164,25 @@ int main(const int argc, const char **argv) {
     if (parmKind & 020000) {
       str_pkind += "_0";
     }/*}}}*/
-    printf("  numSamp    = %d\n", numSamp);
-    printf("  sampPeriod = %d\n", sampPeriod);
-    printf("  sampSize   = %d\n", sampSize);
-    printf("  numDim     = %d\n", numDim);
-    printf("  pramKind   = %o (%s)\n", parmKind, str_pkind.c_str());
-    printf("  DATA:\n");
-    /* Uncompressed type */
-    if (valSize == 4) {
-      assert(sizeFloat == valSize);
-      float_matrix.Load(fd, numSamp, numDim);
-      float_matrix.Dump(numSamp, numDim);
-    }
-    /* Compressed type */
-    else if (sampSize == 2) {
-      assert(sizeInt == sampSize);
-      int_matrix.Load(fd, numSamp, numDim);
-      int_matrix.Dump(numSamp, numDim);
+    cout << "  numSamp    = " << numSamp << endl;
+    cout << "  sampPeriod = " << numSamp << endl;
+    cout << "  sampSize   = " << numSamp << endl;
+    cout << "  numDim     = " << numSamp << endl;
+    cout << "  parmKind   = " << parmKind << "(" << str_pkind << ")" << endl;
+    if (dumpData) {
+      cout << "  DATA:\n";
+      /* Uncompressed type */
+      if (valSize == 4) {
+        assert(sizeFloat == valSize);
+        float_matrix.Load(fd, numSamp, numDim);
+        float_matrix.Dump(numSamp, numDim);
+      }
+      /* Compressed type */
+      else if (sampSize == 2) {
+        assert(sizeInt == sampSize);
+        int_matrix.Load(fd, numSamp, numDim);
+        int_matrix.Dump(numSamp, numDim);
+      }
     }
     fclose(fd);
   }

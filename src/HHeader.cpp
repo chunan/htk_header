@@ -20,7 +20,9 @@ FILE *FOPEN(const char fname[], char const flag[]) {
 }
 
 void Usage(const char *program_name) {
-  cerr << "Usage: " << program_name << " <htk_file1> <htk_file2>...\n";
+  cerr << "Usage: " << program_name << " [options] <htk_file1> <htk_file2>...\n"
+    << "  [options]\n"
+    << "    -d    Dump data matrix\n";
 }
 
 template<class _Tp>
@@ -165,9 +167,9 @@ int main(const int argc, const char **argv) {
       str_pkind += "_0";
     }/*}}}*/
     cout << "  numSamp    = " << numSamp << endl;
-    cout << "  sampPeriod = " << numSamp << endl;
-    cout << "  sampSize   = " << numSamp << endl;
-    cout << "  numDim     = " << numSamp << endl;
+    cout << "  sampPeriod = " << sampPeriod << endl;
+    cout << "  sampSize   = " << sampSize << endl;
+    cout << "  numDim     = " << numDim << endl;
     cout << "  parmKind   = " << parmKind << "(" << str_pkind << ")" << endl;
     if (dumpData) {
       cout << "  DATA:\n";

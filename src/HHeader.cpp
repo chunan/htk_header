@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iomanip>
 #include <cstdlib>
+#include <cstdio>
 
 using std::cout;
 using std::cerr;
@@ -11,23 +12,23 @@ using std::string;
 using std::setprecision;
 
 FILE *FOPEN(const char fname[], char const flag[]) {
-	FILE *fd = fopen(fname, flag);
-	if (fd == NULL) {
-		cerr << "Unable to open file " << fname << " with flag " << flag << "\n";
-		exit(-1);
-	}
-	return fd;
+  FILE *fd = fopen(fname, flag);
+  if (fd == NULL) {
+    cerr << "Unable to open file " << fname << " with flag " << flag << "\n";
+    exit(-1);
+  }
+  return fd;
 }
 
 void Usage(const char *program_name) {
   cerr << "Usage: " << program_name << " [options] <htk_file1> <htk_file2>...\n"
-    << "  [options]\n"
-    << "    -d    Dump data matrix\n";
+       << "  [options]\n"
+       << "    -d    Dump data matrix\n";
 }
 
 template<class _Tp>
 class DataMatrix {
-  public:
+ public:
   DataMatrix() : data(NULL), size(0) {}
   ~DataMatrix() {
     if (data) delete [] data;
@@ -60,7 +61,7 @@ class DataMatrix {
       }
     }
   }
-  private:
+ private:
   _Tp *data;
   unsigned size;
 };

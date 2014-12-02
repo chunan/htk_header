@@ -23,7 +23,8 @@ FILE *FOPEN(const char fname[], char const flag[]) {
 void Usage(const char *program_name) {
   cerr << "Usage: " << program_name << " [options] <htk_file1> <htk_file2>...\n"
        << "  [options]\n"
-       << "    -d    Dump data matrix\n";
+       << "    -d     Dump data matrix.\n"
+       << "    -p int Precision when dump.\n";
 }
 
 template<class _Tp>
@@ -48,12 +49,12 @@ class DataMatrix {
     Allocate(required);
     assert(fread(data, sizeof(_Tp), required, fd) == required);
   }
-  void Dump(unsigned T, unsigned F) {
+  void Dump(unsigned T, unsigned F, int precision) {
     unsigned required = T * F;
     for (unsigned i = 0, f = 0, t = 0; i < required; ++i) {
       if (f == 0)
         cout << t << ":";
-      cout << setprecision(2) << "  " << data[i];
+      cout << setprecision(precision) << "  " << data[i];
       f = (f + 1) % F;
       if (f == 0){
         ++t;
@@ -77,23 +78,30 @@ int main(const int argc, const char **argv) {
    * sampSize = numDim * valSize (unit = bytes)
    * numSamp = number of time frames
    */
-  int numSamp = 0, sampSize = 0, numDim = 0, valSize = 0;
-  int parmKind = 0, sampPeriod = 0;
+  int32_t numSamp = 0, sampPeriod = 0;
+  int16_t sampSize = 0, parmKind = 0;
+  int numDim = 0, valSize = 0;
   int sizeFloat = sizeof(float);
-  int sizeInt = sizeof(int);
+  int precision = 2;
   DataMatrix<float> float_matrix;
-  DataMatrix<int> int_matrix;
+  DataMatrix<int16_t> int_matrix;
 
   string str_pkind;
 
   for (int i = 1; i < argc; ++i) {
     if (strcmp(argv[i], "-d") == 0) {
       dumpData = true;
+    } else if (strcmp(argv[i], "-p") == 0) {
+      assert(i + 1 < argc);
+      precision = atoi(argv[i + 1]);
     }
   }
 
   for (int i = 1; i < argc; ++i) {
     if (strcmp(argv[i], "-d") == 0) {
+      continue;
+    } else if (strcmp(argv[i], "-p") == 0) {
+      ++i;
       continue;
     }
     cout << "FILE = " << argv[i] << "\n";
@@ -178,13 +186,12 @@ int main(const int argc, const char **argv) {
       if (valSize == 4) {
         assert(sizeFloat == valSize);
         float_matrix.Load(fd, numSamp, numDim);
-        float_matrix.Dump(numSamp, numDim);
+        float_matrix.Dump(numSamp, numDim, precision);
       }
       /* Compressed type */
       else if (sampSize == 2) {
-        assert(sizeInt == sampSize);
         int_matrix.Load(fd, numSamp, numDim);
-        int_matrix.Dump(numSamp, numDim);
+        int_matrix.Dump(numSamp, numDim, precision);
       }
     }
     fclose(fd);
